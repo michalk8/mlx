@@ -1177,6 +1177,25 @@ class TestFast(mlx_tests.MLXTestCase):
         self.assertTrue(mx.array_equal(out_a, a * 2.0))
         self.assertTrue(mx.array_equal(out_b, a + 100.0))
 
+    @unittest.skipIf(not mx.metal.is_available(), "Metal is not available")
+    def test_custom_kernel_init_value_empty_output(self):
+        kernel = mx.fast.metal_kernel(
+            name="empty_output",
+            input_names=["inp"],
+            output_names=["out"],
+            source="",
+        )
+        out = kernel(
+            inputs=[mx.zeros((1,))],
+            grid=(1, 1, 1),
+            threadgroup=(1, 1, 1),
+            output_shapes=[(0,)],
+            output_dtypes=[mx.float32],
+            init_value=0.0,
+        )[0]
+        mx.eval(out)
+        self.assertEqual(out.shape, (0,))
+
     @unittest.skipIf(not mx.cuda.is_available(), "CUDA is not available")
     def test_cuda_kernel_same_name_different_source(self):
         # The CUDA module cache was keyed on the kernel name alone, so the
