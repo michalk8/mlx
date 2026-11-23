@@ -1186,7 +1186,7 @@ void dot_product(
   tempResult.set_data(allocator::malloc(tempResult.nbytes()));
   copies.push_back(tempResult);
   all_reduce_dispatch(partials, tempResult, "sum", compute_encoder, d, s);
-  copy_gpu(tempResult, out, CopyType::Scalar, s);
+  copy_gpu_inplace(tempResult, out, CopyType::Scalar, s);
 
   compute_encoder.add_temporaries(std::move(copies));
 }

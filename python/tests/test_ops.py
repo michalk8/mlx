@@ -3387,6 +3387,18 @@ class TestOps(mlx_tests.MLXTestCase):
         with self.assertRaises(ValueError):
             mx.searchsorted(mx.array([1.0, 2.0]), mx.array([1.0]), side="middle")
 
+    @unittest.skipIf(not mx.metal.is_available(), "Metal is not available")
+    def test_searchsorted_empty_sequence_peak_memory(self):
+        a = mx.array([], dtype=mx.float32)
+        v = mx.zeros((1 << 22,))
+        mx.eval(a, v)
+        mx.synchronize()
+        base = mx.get_active_memory()
+        mx.reset_peak_memory()
+        out = mx.searchsorted(a, v)
+        mx.eval(out)
+        self.assertLess(mx.get_peak_memory() - base, 1.5 * out.nbytes)
+
     def test_unique(self):
         def expect(out, want):
             self.assertTrue(mx.array_equal(out, mx.array(want)), f"got {out}")

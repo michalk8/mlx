@@ -352,6 +352,25 @@ class TestGatedDelta(mlx_tests.MLXTestCase):
                         )
             mx.clear_cache()
 
+    @unittest.skipIf(not mx.metal.is_available(), "Metal is not available")
+    def test_gated_delta_peak_memory(self):
+        B, T, H, D = 1, 2048, 32, 128
+        x = mx.zeros((B, T, H, D))
+        g = mx.zeros((B, T, H))
+        h0 = mx.zeros((B, H, D, D))
+        mx.eval(x, g, h0)
+        mx.synchronize()
+
+        base = mx.get_active_memory()
+        mx.reset_peak_memory()
+        out, hf = mx.fast.gated_delta_update(
+            x, x, x, g, g, initial_state=h0, stream=mx.gpu
+        )
+        mx.eval(out, hf)
+        mx.synchronize()
+        # Allocating out once adds 1x out.nbytes, twice 2x: check halfway.
+        self.assertLess(mx.get_peak_memory() - base, 1.5 * out.nbytes + hf.nbytes)
+
 
 if __name__ == "__main__":
     mlx_tests.MLXTestRunner(failfast=True)

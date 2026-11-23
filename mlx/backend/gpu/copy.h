@@ -41,8 +41,9 @@ void copy_gpu_inplace(
     CopyType ctype,
     const Stream& s);
 
-// Fill the output with the scalar val
+// Fill the output with the scalar val. The inplace version does not allocate.
 void fill_gpu(const array& val, array& out, const Stream& s);
+void fill_gpu_inplace(const array& val, array& out, const Stream& s);
 
 // Return a contiguous array with same shape that copies the data of |arr|.
 array contiguous_copy_gpu(const array& arr, const Stream& s);

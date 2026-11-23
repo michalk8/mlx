@@ -383,7 +383,7 @@ void SearchSorted::eval_gpu(const std::vector<array>& inputs, array& out) {
 
   if (a.size() == 0) {
     array zero = array(0, out.dtype());
-    fill_gpu(zero, out, s);
+    fill_gpu_inplace(zero, out, s);
     compute_encoder.add_temporary(std::move(zero));
     return;
   }

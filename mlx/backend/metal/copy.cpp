@@ -181,6 +181,10 @@ void copy_gpu_inplace(
 
 void fill_gpu(const array& val, array& out, const Stream& s) {
   out.set_data(allocator::malloc(out.nbytes()));
+  fill_gpu_inplace(val, out, s);
+}
+
+void fill_gpu_inplace(const array& val, array& out, const Stream& s) {
   if (out.size() == 0) {
     return;
   }
